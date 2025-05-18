@@ -7,7 +7,8 @@ const {
   check, 
   deleteAdmin,
   getAllAdmins,
-  changePassword 
+  changePassword,
+  holdUser
 } = require('../controllers/admin.controller');
 
 const { authMiddleware , isAdmin} = require('../middlewares/authMiddleware');
@@ -21,5 +22,6 @@ router.post("/logout", logout);
 router.get('/admins', authMiddleware, getAllAdmins);
 router.delete("/delete/:id",authMiddleware,isAdmin, deleteAdmin); // Route to delete user by ID
 router.post('/change-password', authMiddleware, changePassword);
+router.post('/hold-user', authMiddleware, holdUser);
 
 module.exports = router;

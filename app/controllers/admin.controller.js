@@ -75,6 +75,12 @@ async function login(req, res) {
         .json({ message: "Invalid username or password" });
     }
 
+    if (admin.hold_user) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Your account is on hold, please contact the admin" });
+    }
+
     // Compare passwords
     const validPassword = await compare(password, admin.password_hash);
     if (!validPassword) {
@@ -105,6 +111,43 @@ async function login(req, res) {
       .json({ message: "Server error" });
   }
 }
+
+// ✅ Hold User
+async function holdUser(req, res) {
+  const { username } = req.body;
+
+  try {
+    // Check if the admin exists
+    const admin = await db.Admin.findOne({
+      where: { username },
+    });
+
+    if (!admin) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Admin not found" });
+    }
+
+    if (admin.hold_user) {
+      await admin.update({ hold_user: false });
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "User unheld successfully" });
+    } else {
+      await admin.update({ hold_user: true });
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "User held successfully" });
+    }
+
+  } catch (error) {
+    console.error("Error holding user:", error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error" });
+  }
+}
+
 
 // ✅ Delete Admin
 async function deleteAdmin(req, res) {
@@ -181,7 +224,7 @@ const check = (req, res) => {
 async function getAllAdmins(req, res) {
   try {
     const admins = await db.Admin.findAll({
-      attributes: ['id', 'username', 'email', 'full_name', 'phone_no', 'role'],
+      attributes: ['id', 'username', 'email', 'full_name', 'phone_no','hold_user', 'role'],
       order: [['created_at', 'DESC']]
     });
 
@@ -264,5 +307,6 @@ module.exports = {
   check, 
   deleteAdmin,
   getAllAdmins,
-  changePassword 
+  changePassword,
+  holdUser
 }; 

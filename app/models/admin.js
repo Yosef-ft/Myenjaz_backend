@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    hold_user: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     updated_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
